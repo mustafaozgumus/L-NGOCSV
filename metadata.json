@@ -1,0 +1,5 @@
+{
+  "name": "LinguaFlow Learn",
+  "description": "A modern vocabulary learning application that parses custom CSV data for Part-based learning, featuring difficulty tracking and AI-powered example generation.",
+  "requestFramePermissions": []
+}
