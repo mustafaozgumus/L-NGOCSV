@@ -98,7 +98,8 @@ export const Flashcard: React.FC<FlashcardProps> = ({
     }
   };
 
-  const handleCheckSentence = async () => {
+  const handleCheckSentence = async (e?: React.MouseEvent) => {
+    if(e) e.stopPropagation();
     if (!userSentence.trim()) return;
     setIsCheckingSentence(true);
     try {
@@ -268,34 +269,37 @@ export const Flashcard: React.FC<FlashcardProps> = ({
           >
             {/* Front Face (English) */}
             <div className="absolute inset-0 backface-hidden rounded-3xl bg-white shadow-xl border border-slate-200 flex flex-col justify-center items-center p-6 md:p-8">
-              <div className="absolute top-6 left-0 right-0 text-center">
-                <span className="text-xs font-bold text-indigo-400 tracking-[0.2em] uppercase">İngilizce</span>
-              </div>
+              {/* Fix for ghost icon: Wrap content and fade out when flipped */}
+              <div className={`w-full h-full flex flex-col justify-center items-center transition-opacity duration-200 ${isFlipped ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-100'}`}>
+                <div className="absolute top-6 left-0 right-0 text-center">
+                  <span className="text-xs font-bold text-indigo-400 tracking-[0.2em] uppercase">İngilizce</span>
+                </div>
 
-              <div className="flex flex-col items-center justify-center w-full flex-1">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 mb-8 break-words max-w-full leading-tight select-none">
-                  {word.english}
-                </h2>
-                <button 
-                  onClick={(e) => handleSpeak(e, word.english, 'en-US')}
-                  className="p-4 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 active:bg-indigo-200 transition-colors shadow-sm z-10"
-                >
-                  <Volume2 size={32} />
-                </button>
-              </div>
+                <div className="flex flex-col items-center justify-center w-full flex-1">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 mb-8 break-words max-w-full leading-tight select-none">
+                    {word.english}
+                  </h2>
+                  <button 
+                    onClick={(e) => handleSpeak(e, word.english, 'en-US')}
+                    className="p-4 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 active:bg-indigo-200 transition-colors shadow-sm z-10"
+                  >
+                    <Volume2 size={32} />
+                  </button>
+                </div>
 
-              <div className="absolute bottom-8 text-slate-400 text-sm font-medium animate-pulse select-none hidden md:block">
-                Çevirmek için boşluk tuşuna bas
-              </div>
-              <div className="absolute bottom-8 text-slate-400 text-sm font-medium animate-pulse select-none md:hidden">
-                Çevirmek için dokun
+                <div className="absolute bottom-8 text-slate-400 text-sm font-medium animate-pulse select-none hidden md:block">
+                  Çevirmek için boşluk tuşuna bas
+                </div>
+                <div className="absolute bottom-8 text-slate-400 text-sm font-medium animate-pulse select-none md:hidden">
+                  Çevirmek için dokun
+                </div>
               </div>
             </div>
 
             {/* Back Face (Turkish + AI) */}
             <div 
               className="absolute inset-0 backface-hidden rotate-y-180 rounded-3xl bg-slate-800 shadow-xl text-white flex flex-col p-6 overflow-hidden"
-              onClick={(e) => e.stopPropagation()} // Stop flip when interacting with back content
+              // Removed onClick stopPropagation to allow flipping back by touching empty space
             >
               {/* Header with Close Flip */}
               <div 
@@ -363,20 +367,24 @@ export const Flashcard: React.FC<FlashcardProps> = ({
                 <div className="border-t border-slate-700 pt-4">
                    {!showPractice ? (
                      <button
-                       onClick={() => setShowPractice(true)}
+                       onClick={(e) => { e.stopPropagation(); setShowPractice(true); }}
                        className="flex items-center justify-center space-x-2 w-full py-3 rounded-xl border border-slate-600 hover:bg-slate-700 transition-colors text-slate-300 text-sm font-medium"
                      >
                         <PenTool size={16} />
                         <span>Kendi Cümleni Kur</span>
                      </button>
                    ) : (
-                     <div className="space-y-3 animate-fade-in bg-slate-900/50 p-3 rounded-xl">
+                     <div 
+                      className="space-y-3 animate-fade-in bg-slate-900/50 p-3 rounded-xl"
+                      onClick={(e) => e.stopPropagation()} // Prevent closing/flipping when tapping inside practice area
+                     >
                         <div className="flex justify-between items-center mb-1">
                           <label className="text-xs text-slate-400 font-medium">Senin Cümlen:</label>
                           <button onClick={() => setShowPractice(false)} className="text-slate-500 hover:text-white"><X size={14}/></button>
                         </div>
                         <textarea
                           value={userSentence}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => setUserSentence(e.target.value)}
                           placeholder={`"${word.english}" kelimesini kullanarak bir cümle yaz...`}
                           className="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-20 placeholder:text-slate-600"
@@ -405,7 +413,7 @@ export const Flashcard: React.FC<FlashcardProps> = ({
                                </div>
                              )}
                              <button 
-                              onClick={() => { setSentenceFeedback(null); setUserSentence(''); }}
+                              onClick={(e) => { e.stopPropagation(); setSentenceFeedback(null); setUserSentence(''); }}
                               className="mt-3 text-xs underline opacity-60 hover:opacity-100"
                              >
                                Yeni Cümle Dene
